@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Odd One Out - Unit 3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Professional Icons instead of Emojis -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Nunito', sans-serif; background-color: #f0fdf4; }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .pop {
+            animation: pop 0.5s ease-out forwards;
+        }
+        @keyframes pop {
+            0% { transform: scale(0.9); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .option-btn {
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .icon-container {
+            color: #4b5563; /* Tailwind gray-600 */
+            transition: color 0.2s;
+        }
+        .option-btn:hover:not(:disabled) .icon-container {
+            color: #16a34a; /* Tailwind green-600 */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4 text-gray-800">
+
+    <div class="w-full max-w-3xl bg-white rounded-3xl shadow-xl overflow-hidden border border-green-100">
+        <!-- Header -->
+        <div class="bg-green-600 text-white p-6 text-center">
+            <span class="bg-green-800 text-green-100 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">Unit 3: Care and Prevention Actions</span>
+            <h1 class="text-3xl font-extrabold mt-4"><i class="fa-solid fa-magnifying-glass mr-2"></i> Odd One Out!</h1>
+            <p class="text-green-100 mt-2">Find the odd one out. Three words are related, but one doesn't belong!</p>
+        </div>
+
+        <!-- Game Container -->
+        <div class="p-8">
+            <!-- Progress -->
+            <div class="flex justify-between items-center mb-6">
+                <span id="round-counter" class="text-sm font-bold text-gray-500 uppercase">Round 1 of 5</span>
+                <span class="text-sm font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full">Score: <span id="score-counter">0</span></span>
+            </div>
+
+            <!-- Question Area -->
+            <div id="game-area">
+                <h2 id="question-title" class="text-2xl font-bold text-center text-gray-700 mb-8">Which one is the odd one out?</h2>
+
+                <!-- Options Grid -->
+                <div id="options-grid" class="grid grid-cols-2 gap-4 md:gap-6 mb-8">
+                    <!-- Buttons injected via JS -->
+                </div>
+
+                <!-- Feedback Area -->
+                <div id="feedback-area" class="hidden text-center p-6 rounded-2xl mb-6">
+                    <h3 id="feedback-title" class="text-2xl font-bold mb-2"></h3>
+                    <p id="feedback-text" class="text-gray-700"></p>
+                </div>
+
+                <!-- Next Button -->
+                <div class="text-center">
+                    <button id="next-btn" onclick="nextRound()" class="hidden bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                        Next Round <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- End Screen -->
+            <div id="end-screen" class="hidden text-center py-10">
+                <div class="text-7xl mb-4 text-yellow-500"><i class="fa-solid fa-trophy"></i></div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Completed!</h2>
+                <p class="text-xl text-gray-600 mb-8">Your final score is: <span id="final-score" class="font-extrabold text-green-600"></span> out of 5</p>
+                <button onclick="restartGame()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform transform hover:scale-105">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> Play Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game Data using FontAwesome classes instead of emojis
+        const quizData = [
+            {
+                category: "Good environmental actions",
+                options: [
+                    { word: "Recycle", icon: "fa-solid fa-recycle", isOdd: false },
+                    { word: "Save water", icon: "fa-solid fa-hand-holding-droplet", isOdd: false },
+                    { word: "Pollute", icon: "fa-solid fa-smog", isOdd: true },
+                    { word: "Plant trees", icon: "fa-solid fa-seedling", isOdd: false }
+                ],
+                explanation: "<b>Pollute</b> is the odd one out because it is a destructive action, while the other three are actions to protect the environment."
+            },
+            {
+                category: "Things we protect",
+                options: [
+                    { word: "Forest", icon: "fa-solid fa-tree", isOdd: false },
+                    { word: "River", icon: "fa-solid fa-water", isOdd: false },
+                    { word: "Wildfire", icon: "fa-solid fa-fire-flame-curved", isOdd: true },
+                    { word: "Animals", icon: "fa-solid fa-paw", isOdd: false }
+                ],
+                explanation: "<b>Wildfire</b> is the odd one out. We protect forests, rivers, and animals, not wildfires!"
+            },
+            {
+                category: "Verbs of destruction vs Care",
+                options: [
+                    { word: "Protect", icon: "fa-solid fa-shield-halved", isOdd: true },
+                    { word: "Destroy", icon: "fa-solid fa-bomb", isOdd: false },
+                    { word: "Burn", icon: "fa-solid fa-fire", isOdd: false },
+                    { word: "Waste", icon: "fa-solid fa-trash-can", isOdd: false }
+                ],
+                explanation: "<b>Protect</b> is the odd one out. 'Destroy', 'Burn', and 'Waste' are negative or destructive actions."
+            },
+            {
+                category: "Safety Commands (Imperatives)",
+                options: [
+                    { word: "Stay safe!", icon: "fa-solid fa-hard-hat", isOdd: false },
+                    { word: "Be careful!", icon: "fa-solid fa-triangle-exclamation", isOdd: false },
+                    { word: "Danger", icon: "fa-solid fa-skull-crossbones", isOdd: true },
+                    { word: "Follow instructions!", icon: "fa-solid fa-clipboard-list", isOdd: false }
+                ],
+                explanation: "<b>Danger</b> is the odd one out because it is a noun. The other three are imperative verbs (safety commands or instructions)."
+            },
+            {
+                category: "Bad habits to avoid",
+                options: [
+                    { word: "Clean", icon: "fa-solid fa-broom", isOdd: true },
+                    { word: "Throw trash", icon: "fa-solid fa-dumpster", isOdd: false },
+                    { word: "Waste water", icon: "fa-solid fa-faucet-drip", isOdd: false },
+                    { word: "Litter", icon: "fa-solid fa-trash", isOdd: false }
+                ],
+                explanation: "<b>Clean</b> is the odd one out. It is a good action, while littering, wasting water, and throwing trash are bad habits."
+            }
+        ];
+
+        let currentRound = 0;
+        let score = 0;
+        let attempts = 0;
+
+        const optionsGrid = document.getElementById('options-grid');
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+        const roundCounter = document.getElementById('round-counter');
+        const scoreCounter = document.getElementById('score-counter');
+        const gameArea = document.getElementById('game-area');
+        const endScreen = document.getElementById('end-screen');
+
+        function initGame() {
+            currentRound = 0;
+            score = 0;
+            updateUI();
+            loadRound();
+            gameArea.classList.remove('hidden');
+            endScreen.classList.add('hidden');
+        }
+
+        function loadRound() {
+            attempts = 0;
+            feedbackArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            optionsGrid.innerHTML = '';
+
+            const roundData = quizData[currentRound];
+            roundCounter.innerText = `Round ${currentRound + 1} of ${quizData.length}`;
+
+            // Shuffle options slightly
+            const shuffledOptions = [...roundData.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach((option) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn bg-white border-2 border-gray-200 text-gray-700 font-bold p-6 rounded-2xl text-xl flex flex-col items-center justify-center gap-3 hover:border-green-400 focus:outline-none';
+                btn.innerHTML = `<span class="text-4xl icon-container"><i class="${option.icon}"></i></span> <span>${option.word}</span>`;
+                btn.onclick = () => checkAnswer(option.isOdd, btn);
+                optionsGrid.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(isCorrect, btnElement) {
+            const allButtons = document.querySelectorAll('.option-btn');
+
+            feedbackArea.classList.remove('hidden');
+            feedbackArea.classList.add('pop');
+            setTimeout(() => feedbackArea.classList.remove('pop'), 500);
+
+            // Change icon color of clicked button safely
+            const iconEl = btnElement.querySelector('.icon-container');
+
+            if (isCorrect) {
+                // CORRECT
+                if(attempts === 0) score++;
+                updateUI();
+
+                btnElement.classList.remove('border-gray-200', 'hover:border-green-400', 'text-gray-700');
+                btnElement.classList.add('border-green-500', 'bg-green-50', 'text-green-800', 'ring-4', 'ring-green-200');
+                if(iconEl) {
+                    iconEl.classList.remove('text-gray-600');
+                    iconEl.classList.add('text-green-600');
+                }
+
+                allButtons.forEach(b => b.disabled = true);
+
+                feedbackArea.className = 'p-6 rounded-2xl mb-6 bg-green-100 border border-green-300';
+                feedbackTitle.className = 'text-2xl font-bold mb-2 text-green-800';
+                feedbackTitle.innerHTML = 'Correct! <i class="fa-solid fa-circle-check ml-2"></i>';
+                feedbackText.innerHTML = quizData[currentRound].explanation;
+
+                nextBtn.classList.remove('hidden');
+            } else {
+                // INCORRECT
+                attempts++;
+                btnElement.classList.add('shake', 'border-red-400', 'bg-red-50', 'opacity-50');
+                if(iconEl) iconEl.classList.add('text-red-500');
+                btnElement.disabled = true;
+
+                setTimeout(() => btnElement.classList.remove('shake'), 500);
+
+                feedbackArea.className = 'p-6 rounded-2xl mb-6 bg-red-100 border border-red-300';
+                feedbackTitle.className = 'text-2xl font-bold mb-2 text-red-800';
+                feedbackTitle.innerHTML = 'Oops! That\'s not it. <i class="fa-solid fa-circle-xmark ml-2"></i>';
+                feedbackText.innerHTML = 'That word belongs to the main category. Keep looking for the odd one out.';
+            }
+        }
+
+        function nextRound() {
+            currentRound++;
+            if (currentRound < quizData.length) {
+                loadRound();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function showEndScreen() {
+            gameArea.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            endScreen.classList.add('pop');
+            document.getElementById('final-score').innerText = score;
+        }
+
+        function restartGame() {
+            initGame();
+        }
+
+        function updateUI() {
+            scoreCounter.innerText = score;
+        }
+
+        // Start game on load
+        window.onload = initGame;
+    </script>
+</body>
+</html>
